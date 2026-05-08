@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TAITA | Sistema de Pedidos Offline-First</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&family=Urbanist:wght@700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* === VARIABLES GLOBALES === */
+        :root {
+            --bg-dark: #050505; --bg-card: #1e293b; --bg-alt: #0f172a;
+            --neon: #DEFF9A; --warning: #f59e0b; --danger: #ef4444; --info: #3b82f6; --success: #10b981;
+            --text-main: #f8fafc; --text-muted: #94a3b8;
+            --font-head: 'Urbanist', sans-serif; --font-body: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: var(--bg-dark); color: var(--text-main); font-family: var(--font-body); line-height: 1.6; overflow-x: hidden; }
+
+        /* === 1. ESTILOS DE LA LANDING PAGE === */
+        #landing-container { display: block; animation: fadeIn 0.5s; }
+        
+        .navbar { position: fixed; top: 0; width: 100%; background: rgba(5,5,5,0.9); padding: 15px 50px; display: flex; justify-content: space-between; align-items: center; z-index: 1000; backdrop-filter: blur(10px); border-bottom: 1px solid #334155; }
+        .logo { font-family: var(--font-head); font-size: 26px; font-weight: 900; color: white; text-decoration: none; letter-spacing: 1px; }
+        .logo span { color: var(--neon); }
+        .nav-links { display: flex; align-items: center; gap: 30px; }
+        .nav-links a { color: white; text-decoration: none; font-weight: 600; transition: 0.3s; font-size: 15px; }
+        .nav-links a:hover { color: var(--neon); }
+        
+        .btn-cta { background: var(--neon); color: black; padding: 12px 28px; border-radius: 50px; text-decoration: none; font-weight: bold; transition: 0.3s; display: inline-block; cursor: pointer; border: none; font-size: 15px; font-family: var(--font-body);}
+        .btn-cta:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(222, 255, 154, 0.2); }
+        .btn-outline { background: transparent; color: var(--text-main); padding: 12px 28px; border-radius: 50px; text-decoration: none; font-weight: bold; transition: 0.3s; display: inline-block; border: 2px solid #334155; font-size: 15px; }
+        .btn-outline:hover { border-color: var(--neon); color: var(--neon); }
+
+        .hero { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at 70% 50%, rgba(222, 255, 154, 0.1) 0%, transparent 60%); padding: 120px 50px 60px; position: relative;}
+        .hero-container { display: flex; align-items: center; justify-content: space-between; max-width: 1300px; width: 100%; gap: 50px; }
+        
+        .hero-text { flex: 1.1; text-align: left; z-index: 2;}
+        .hero-badges { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .hero-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(51, 65, 85, 0.5); color: var(--text-main); padding: 6px 16px; border-radius: 50px; font-weight: 600; font-size: 13px; border: 1px solid #334155; }
+        .hero-badge.highlight { background: rgba(222, 255, 154, 0.1); color: var(--neon); border-color: rgba(222, 255, 154, 0.3); }
+        
+        .hero h1 { font-family: var(--font-head); font-size: 60px; line-height: 1.1; margin-bottom: 20px; }
+        .hero h1 span { color: var(--neon); }
+        .hero p { font-size: 18px; color: var(--text-muted); margin-bottom: 30px; line-height: 1.7; }
+        
+        .hero-features-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 40px; }
+        .hf-item { display: flex; align-items: flex-start; gap: 12px; }
+        .hf-icon { background: var(--bg-card); color: var(--neon); width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; border: 1px solid #334155;}
+        .hf-text h4 { font-size: 15px; color: white; margin-bottom: 3px; }
+        .hf-text p { font-size: 13px; color: var(--text-muted); margin: 0; line-height: 1.4; }
+        
+        .hero-buttons { display: flex; gap: 15px; flex-wrap: wrap; }
+
+        .hero-visual { flex: 0.9; position: relative; height: 500px; display: flex; justify-content: center; align-items: center; }
+        .floating-tag { position: absolute; top: 0; right: 20%; background: var(--info); color: white; padding: 8px 15px; border-radius: 8px; font-size: 12px; font-weight: bold; z-index: 10; box-shadow: 0 10px 20px rgba(0,0,0,0.3); animation: float 5s infinite; }
+        .floating-tag::after { content: ''; position: absolute; bottom: -6px; left: 20px; border-width: 6px 6px 0; border-style: solid; border-color: var(--info) transparent transparent transparent; }
+
+        .mockup-mozo { position: absolute; left: 5%; top: 10%; width: 240px; height: 450px; background: var(--bg-dark); border: 8px solid #334155; border-radius: 30px; padding: 15px; box-shadow: 0 25px 50px rgba(0,0,0,0.6); z-index: 3; animation: float 6s ease-in-out infinite; display: flex; flex-direction: column;}
+        .phone-notch { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 100px; height: 20px; background: #334155; border-bottom-left-radius: 15px; border-bottom-right-radius: 15px; }
+        .mk-header { font-family: var(--font-head); color: var(--neon); font-size: 16px; margin-top: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; padding-bottom: 10px;}
+        .mk-line { height: 10px; background: #1e293b; border-radius: 4px; margin-bottom: 12px; width: 100%; }
+        .mk-line.short { width: 60%; }
+        .mk-btn { background: var(--info); height: 45px; border-radius: 8px; margin-top: auto; display: flex; align-items: center; justify-content: center; color: white; font-size: 14px; font-weight: bold;}
+        .mk-order { background: var(--bg-alt); padding: 12px; border-radius: 8px; border-left: 4px solid var(--warning); margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;}
+        .mk-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--warning); }
+
+        .mockup-cajero { position: absolute; right: 0; bottom: 5%; width: 400px; height: 260px; background: var(--bg-alt); border: 4px solid #1e293b; border-radius: 12px; padding: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.5); z-index: 1; animation: float 8s ease-in-out infinite reverse; }
+        .mockup-cajero::before { content: ''; position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%); width: 80px; height: 20px; background: #1e293b; border-radius: 0 0 10px 10px; }
+        
+        @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-15px); } 100% { transform: translateY(0px); } }
+
+        .trust-bar { position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(10px); border-top: 1px solid #334155; padding: 20px 50px; display: flex; justify-content: space-around; flex-wrap: wrap; z-index: 10;}
+        .trust-item { display: flex; align-items: center; gap: 10px; color: var(--text-main); font-weight: 600; font-size: 15px;}
+        .trust-item i { color: var(--neon); font-size: 20px; }
+
+        /* === 2. ESTILOS DEL SISTEMA (APP) === */
+        #app-container { display: none; height: 100vh; flex-direction: column; animation: fadeIn 0.5s; background: var(--bg-dark); }
+        .app-topbar { background: #000; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; flex-shrink: 0;}
+        .topbar-left { display: flex; align-items: center; gap: 20px; width: 33%; }
+        .topbar-center { width: 33%; text-align: center; }
+        .topbar-right { width: 33%; display: flex; justify-content: flex-end; }
+        .btn-volver { background: transparent; color: var(--text-muted); border: 1px solid #334155; padding: 8px 15px; border-radius: 6px; font-size: 14px; cursor: pointer; transition: 0.3s; font-weight: 600; }
+        .btn-volver:hover { color: white; border-color: var(--text-main); }
+        .net-indicator { padding: 10px 20px; border-radius: 8px; font-weight: bold; font-size: 14px; transition: 0.3s; }
+        .net-on { background: var(--neon); color: black; }
+        .net-off { background: var(--danger); color: white; box-shadow: 0 0 15px rgba(239, 68, 68, 0.5); }
+
+        .app-body { padding: 30px; flex-grow: 1; overflow-y: auto; display: flex; justify-content: center; align-items: flex-start;}
+        .app-view { display: none; width: 100%; max-width: 1200px; animation: fadeIn 0.4s ease; }
+        .app-view.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .system-welcome { text-align: center; margin-bottom: 40px; }
+        .system-welcome h1 { font-family: var(--font-head); font-size: 45px; color: white; }
+        .system-welcome h1 span { color: var(--neon); }
+        .system-welcome p { color: var(--text-muted); font-size: 18px; margin-top: 10px; }
+        
+        .status-dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; max-width: 900px; margin: 0 auto 40px; }
+        .status-card { background: var(--bg-card); border: 1px solid #334155; padding: 25px; border-radius: 12px; text-align: center; }
+        .status-card h3 { font-size: 16px; color: var(--text-muted); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
+        .status-card .value { font-family: var(--font-head); font-size: 32px; color: white; }
+        .status-card .value.green { color: var(--success); }
+        .status-card .value.orange { color: var(--warning); }
+
+        .role-selector-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; max-width: 1000px; margin: 0 auto; }
+        .role-card { background: var(--bg-card); padding: 40px 30px; border-radius: 16px; border: 2px solid #334155; text-align: center; cursor: pointer; transition: 0.3s; position: relative; overflow: hidden; }
+        .role-card::before { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 5px; background: #334155; transition: 0.3s; }
+        .role-card:hover { transform: translateY(-5px); background: #283548; border-color: var(--text-muted); }
+        .role-card:hover::before { background: var(--neon); }
+        .role-card h2 { font-family: var(--font-head); color: white; font-size: 26px; margin-bottom: 15px; }
+        .role-card p { color: var(--text-muted); font-size: 15px; line-height: 1.5; }
+
+        .panel { background: var(--bg-card); padding: 25px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #334155; }
+        .panel-head { font-size: 18px; color: var(--neon); margin-bottom: 20px; font-weight: 700; border-bottom: 1px solid #334155; padding-bottom: 10px; display: flex; justify-content: space-between;}
+        .form-control { width: 100%; padding: 15px; border-radius: 8px; border: 1px solid #334155; background: var(--bg-alt); color: white; margin-bottom: 15px; font-size: 16px; }
+        .btn-app { width: 100%; padding: 15px; background: var(--info); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; }
+        
+        .order-card { background: var(--bg-alt); padding: 15px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid; }
+        .badge { padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; text-transform: uppercase; }
+        .st-pendiente { border-color: var(--warning); } .st-pendiente .badge { background: rgba(245,158,11,0.2); color: var(--warning); }
+        .st-enviado { border-color: var(--success); } .st-enviado .badge { background: rgba(16,185,129,0.2); color: var(--success); }
+        .st-preparando { border-color: var(--info); } .st-preparando .badge { background: rgba(59,130,246,0.2); color: var(--info); }
+        
+        .grid-2-app { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #334155; }
+        th { color: var(--neon); background: var(--bg-alt); }
+        
+        .table-responsive { overflow-x: auto; width: 100%; }
+
+        /* ======================================================== */
+        /* RESPONSIVE DESIGN (SOLUCIÓN AL PROBLEMA DE CELULARES)    */
+        /* ======================================================== */
+        @media (max-width: 900px) {
+            /* Landing Page en Celular */
+            .navbar { padding: 15px 20px; }
+            .nav-links a { display: none; } /* Oculta textos largos arriba */
+            
+            /* ¡ESTO LO ARREGLA! Pone los elementos uno debajo del otro */
+            .hero { padding: 120px 20px 0px; height: auto; text-align: center; flex-direction: column; justify-content: flex-start;}
+            .hero-container { flex-direction: column; gap: 30px; }
+            .hero-text { text-align: center; }
+            .hero h1 { font-size: 40px; }
+            .hero p { font-size: 16px; }
+            .hero-features-grid { grid-template-columns: 1fr; text-align: left; margin: 0 auto 30px;}
+            .hero-buttons { justify-content: center; flex-direction: column; width: 100%; }
+            .hero-buttons button, .hero-buttons a { width: 100%; text-align: center; }
+            .hero-visual { display: none; } /* Oculta animaciones que rompen celulares */
+            
+            /* Pone la barra 100% abajo del todo sin aplastarse a la derecha */
+            .trust-bar { position: relative; flex-direction: column; gap: 15px; padding: 30px 20px; text-align: center; width: 100%; margin-top: 40px;}
+            
+            /* Sistema App en Celular */
+            .app-topbar { flex-direction: column; gap: 15px; text-align: center; padding: 15px; }
+            .topbar-left, .topbar-center, .topbar-right { width: 100%; justify-content: center; }
+            
+            .app-body { padding: 15px; }
+            .system-welcome h1 { font-size: 32px; }
+            .grid-2-app { grid-template-columns: 1fr; gap: 15px; }
+            .role-selector-grid { grid-template-columns: 1fr; }
+            .status-dashboard { grid-template-columns: 1fr; gap: 15px; }
+            
+            .panel { padding: 15px; }
+            .order-card { flex-direction: column; align-items: flex-start; gap: 10px; }
+            .order-card button { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="landing-container">
+        <nav class="navbar">
+            <a href="#" class="logo">SISTEMA <span>TAITA</span></a>
+            <div class="nav-links">
+                <a href="#"><i class="fa-solid fa-mobile-screen"></i> Mobile First</a>
+                <a href="#"><i class="fa-solid fa-database"></i> Arquitectura</a>
+                <button onclick="abrirApp()" class="btn-cta"><i class="fa-solid fa-play"></i> Probar App</button>
+            </div>
+        </nav>
+
+        <header class="hero">
+            <div class="hero-container">
+                <div class="hero-text">
+                    <div class="hero-badges">
+                        <div class="hero-badge highlight"><i class="fa-solid fa-star"></i> Proyecto IHC v1.0</div>
+                        <div class="hero-badge"><i class="fa-brands fa-android"></i> <i class="fa-brands fa-apple"></i> Multiplataforma</div>
+                    </div>
+                    
+                    <h1>Operatividad <span>Sin Interrupciones</span> en TAITA</h1>
+                    <p>Plataforma de gestión de comandas. **El mozo usa su propio celular** para tomar pedidos en zonas sin señal, sincronizando automáticamente con la caja en cuanto recupera la red.</p>
+                    
+                    <div class="hero-features-grid">
+                        <div class="hf-item">
+                            <div class="hf-icon"><i class="fa-solid fa-mobile-screen-button"></i></div>
+                            <div class="hf-text">
+                                <h4>100% Celular</h4>
+                                <p>Interfaz móvil sin necesidad de descargar apps pesadas.</p>
+                            </div>
+                        </div>
+                        <div class="hf-item">
+                            <div class="hf-icon"><i class="fa-solid fa-floppy-disk"></i></div>
+                            <div class="hf-text">
+                                <h4>Memoria Caché</h4>
+                                <p>Cero pérdida de datos ante fallos del WiFi local.</p>
+                            </div>
+                        </div>
+                        <div class="hf-item">
+                            <div class="hf-icon"><i class="fa-solid fa-rotate"></i></div>
+                            <div class="hf-text">
+                                <h4>Sincronización</h4>
+                                <p>Background Sync transparente en menos de 3 seg.</p>
+                            </div>
+                        </div>
+                        <div class="hf-item">
+                            <div class="hf-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                            <div class="hf-text">
+                                <h4>Control UUIDv4</h4>
+                                <p>Evita duplicación de pedidos y cruces en la barra.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="hero-buttons">
+                        <button onclick="abrirApp()" class="btn-cta" style="font-size: 18px; padding: 15px 35px;"><i class="fa-solid fa-power-off"></i> Iniciar Simulador</button>
+                    </div>
+                </div>
+                
+                <div class="hero-visual">
+                    <div class="floating-tag">Optimizado para el Celular del Mozo</div>
+                    
+                    <div class="mockup-mozo">
+                        <div class="phone-notch"></div>
+                        <div class="mk-header"><span><i class="fa-solid fa-user"></i> Mozo</span> <div style="display:flex; gap:5px; align-items:center;"><i class="fa-solid fa-wifi" style="color:var(--danger); font-size:12px;"></i> <i class="fa-solid fa-battery-full" style="color:white; font-size:12px;"></i></div></div>
+                        
+                        <div class="mk-line"></div>
+                        <div class="mk-line"></div>
+                        <div class="mk-line short"></div>
+                        
+                        <div style="margin-top: 15px; font-size: 12px; color: white; font-weight:bold;">Pedidos Locales:</div>
+                        <div class="mk-order" style="margin-top:5px;"><div class="mk-line short" style="margin:0; width:50%; background:#334155;"></div> <div class="mk-dot"></div></div>
+                        <div class="mk-order"><div class="mk-line short" style="margin:0; width:40%; background:#334155;"></div> <div class="mk-dot"></div></div>
+                        
+                        <div class="mk-btn"><i class="fa-solid fa-plus"></i> Tomar Pedido</div>
+                    </div>
+                    
+                    <div class="mockup-cajero">
+                        <div class="mk-header"><span><i class="fa-solid fa-desktop"></i> Dashboard Barra</span> <i class="fa-solid fa-signal" style="color:var(--success)"></i></div>
+                        <div style="display: flex; gap: 15px; margin-top: 15px;">
+                            <div style="flex:1; background: var(--bg-dark); padding: 10px; border-radius: 8px;">
+                                <div class="mk-line short" style="margin-bottom: 15px; background:var(--success)"></div>
+                                <div class="mk-line"></div><div class="mk-line"></div>
+                            </div>
+                            <div style="flex:1; background: var(--bg-dark); padding: 10px; border-radius: 8px;">
+                                <div class="mk-line short" style="margin-bottom: 15px; background:var(--info)"></div>
+                                <div class="mk-line"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="trust-bar">
+                <div class="trust-item"><i class="fa-solid fa-check-double"></i> 0% Pérdida de Pedidos</div>
+                <div class="trust-item"><i class="fa-solid fa-bolt"></i> +50% Rapidez en Atención</div>
+                <div class="trust-item"><i class="fa-solid fa-eye-slash"></i> Adiós a las notas de papel</div>
+                <div class="trust-item"><i class="fa-solid fa-chart-line"></i> Auditoría de Caja Exacta</div>
+            </div>
+        </header>
+    </div>
+
+    <div id="app-container">
+        <div class="app-topbar">
+            <div class="topbar-left">
+                <button id="btn-volver-web" class="btn-volver" onclick="cerrarApp()"><i class="fa-solid fa-arrow-left"></i> Salir a la Web</button>
+                <button id="btn-cambiar-rol" class="btn-volver" style="display: none;" onclick="volverMenuRoles()"><i class="fa-solid fa-arrow-left"></i> Menú Principal</button>
+            </div>
+            <div class="topbar-center">
+                <div class="logo" style="font-size: 20px;">TAITA <span>POS</span></div>
+            </div>
+            <div class="topbar-right">
+                <div id="net-badge" class="net-indicator net-on"><i class="fa-solid fa-wifi"></i> WIFI: CONECTADO</div>
+            </div>
+        </div>
+
+        <div class="app-body">
+            
+            <div id="vista-selector" class="app-view active">
+                <div class="system-welcome">
+                    <h1>Plataforma <span>TAITA</span></h1>
+                    <p>Seleccione su módulo de trabajo asignado.</p>
+                </div>
+
+                <div class="status-dashboard">
+                    <div class="status-card">
+                        <h3>Estado de Conexión</h3>
+                        <div class="value green" id="ui-main-status"><i class="fa-solid fa-check-circle"></i> En Línea</div>
+                    </div>
+                    <div class="status-card">
+                        <h3>Pedidos en Caché</h3>
+                        <div class="value orange" id="ui-main-queue">0</div>
+                    </div>
+                    <div class="status-card">
+                        <h3>Fecha Operativa</h3>
+                        <div class="value" style="font-size: 20px; padding-top: 5px;" id="ui-main-date">...</div>
+                    </div>
+                </div>
+                
+                <div class="role-selector-grid">
+                    <div class="role-card" onclick="seleccionarRol('mozo')">
+                        <h2><i class="fa-solid fa-mobile-screen"></i> Módulo Mozo</h2>
+                        <p>Interfaz celular Offline-First. Registre comandas mientras camina por el salón, sin internet.</p>
+                    </div>
+                    <div class="role-card" onclick="seleccionarRol('cajero')">
+                        <h2><i class="fa-solid fa-desktop"></i> Módulo Barra</h2>
+                        <p>Dashboard horizontal. Reciba pedidos enviados desde los celulares de los mozos en tiempo real.</p>
+                    </div>
+                    <div class="role-card" onclick="seleccionarRol('admin-login')">
+                        <h2><i class="fa-solid fa-chart-pie"></i> Módulo Gerencia</h2>
+                        <p>Módulo de seguridad para administradores. Requiere inicio de sesión (admin).</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="vista-mozo" class="app-view">
+                <div style="max-width: 450px; margin: 0 auto;">
+                    <div class="panel" style="border-top: 4px solid var(--neon);">
+                        <div class="panel-head">Tomar Pedido <span style="font-size: 13px; color: var(--text-muted); font-weight: normal;"><i class="fa-solid fa-mobile-button"></i> Móvil</span></div>
+                        <select id="app-prod" class="form-control">
+                            <option value="Cerveza Pilsen|15">Cerveza Pilsen - S/ 15.00</option>
+                            <option value="Chilcano de Pisco|20">Chilcano de Pisco - S/ 20.00</option>
+                            <option value="Ron Cartavio|25">Ron Cartavio - S/ 25.00</option>
+                            <option value="Agua Mineral|5">Agua Mineral - S/ 5.00</option>
+                        </select>
+                        <input type="number" id="app-cant" class="form-control" value="1" min="1">
+                        <button class="btn-app" onclick="enviarPedido()"><i class="fa-solid fa-paper-plane"></i> Enviar a Caja</button>
+                    </div>
+                    <div class="panel">
+                        <div class="panel-head">Mis Pedidos Realizados</div>
+                        <div id="ui-mozo-lista"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="vista-cajero" class="app-view">
+                <div class="panel">
+                    <div class="panel-head">Dashboard Central de Preparación</div>
+                    <div class="grid-2-app">
+                        <div><h3 style="color: var(--success); margin-bottom: 15px; border-bottom: 1px solid #334155; padding-bottom:10px;"><i class="fa-solid fa-inbox"></i> Nuevos</h3><div id="ui-cajero-nuevos"></div></div>
+                        <div><h3 style="color: var(--info); margin-bottom: 15px; border-bottom: 1px solid #334155; padding-bottom:10px;"><i class="fa-solid fa-blender"></i> Preparando</h3><div id="ui-cajero-prep"></div></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="vista-admin-login" class="app-view">
+                <div class="panel" style="max-width: 400px; margin: 50px auto; text-align: center;">
+                    <div class="panel-head" style="justify-content: center; border: none;"><i class="fa-solid fa-lock" style="margin-right: 10px;"></i> Control de Acceso</div>
+                    <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 14px;">Ingrese sus credenciales gerenciales.</p>
+                    <input type="text" id="log-user" class="form-control" placeholder="Usuario (admin)">
+                    <input type="password" id="log-pass" class="form-control" placeholder="Contraseña (Taita2026)">
+                    <button class="btn-app" style="background: var(--neon); color: black;" onclick="login()">Validar Credenciales</button>
+                    <p id="log-error" style="color: var(--danger); display: none; margin-top: 15px;"><i class="fa-solid fa-circle-exclamation"></i> Error.</p>
+                </div>
+            </div>
+
+            <div id="vista-admin-panel" class="app-view">
+                <div class="grid-2-app" style="margin-bottom: 20px;">
+                    <div class="panel" style="text-align: center;"><p style="color: var(--text-muted); text-transform: uppercase; font-size:12px;">Recaudación</p><h2 style="font-size: 35px; color: var(--neon);" id="ui-admin-total">S/ 0.00</h2></div>
+                    <div class="panel" style="text-align: center;"><p style="color: var(--text-muted); text-transform: uppercase; font-size:12px;">Pedidos</p><h2 style="font-size: 35px; color: var(--neon);" id="ui-admin-count">0</h2></div>
+                </div>
+                <div class="panel">
+                    <div class="panel-head">Auditoría Transaccional <button style="background: transparent; color: var(--danger); border: none; cursor: pointer; font-weight: bold;" onclick="cerrarSesionAdmin()"><i class="fa-solid fa-right-from-bracket"></i> Salir</button></div>
+                    
+                    <div class="table-responsive">
+                        <table>
+                            <thead><tr><th>UUID</th><th>Producto</th><th>Total</th><th>Estado</th></tr></thead>
+                            <tbody id="ui-admin-tabla"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('ui-main-date').innerText = new Date().toLocaleDateString('es-PE', { year: 'numeric', month: 'short', day: 'numeric' });
+
+        function abrirApp() {
+            document.getElementById('landing-container').style.display = 'none';
+            document.getElementById('app-container').style.display = 'flex';
+            window.scrollTo(0, 0);
+            volverMenuRoles();
+            render(); 
+        }
+
+        function cerrarApp() {
+            document.getElementById('app-container').style.display = 'none';
+            document.getElementById('landing-container').style.display = 'block';
+            window.scrollTo(0, 0);
+        }
+
+        function volverMenuRoles() {
+            document.querySelectorAll('.app-view').forEach(e => e.classList.remove('active'));
+            document.getElementById('vista-selector').classList.add('active');
+            document.getElementById('btn-volver-web').style.display = 'block';
+            document.getElementById('btn-cambiar-rol').style.display = 'none';
+            document.getElementById('ui-main-queue').innerText = colaOffline.length;
+        }
+
+        function seleccionarRol(rol) {
+            document.querySelectorAll('.app-view').forEach(e => e.classList.remove('active'));
+            document.getElementById(`vista-${rol}`).classList.add('active');
+            document.getElementById('btn-volver-web').style.display = 'none';
+            document.getElementById('btn-cambiar-rol').style.display = 'block';
+            render();
+        }
+
+        function login() {
+            const u = document.getElementById('log-user').value;
+            const p = document.getElementById('log-pass').value;
+            
+            if(u === 'admin' && p === 'Taita2026') {
+                isAdmin = true;
+                document.getElementById('vista-admin-login').classList.remove('active');
+                document.getElementById('vista-admin-panel').classList.add('active');
+                document.getElementById('log-error').style.display = 'none';
+                document.getElementById('log-user').value = '';
+                document.getElementById('log-pass').value = '';
+                render();
+            } else { 
+                document.getElementById('log-error').style.display = 'block'; 
+            }
+        }
+
+        function cerrarSesionAdmin() {
+            isAdmin = false;
+            volverMenuRoles();
+        }
+
+        let dbCentral = JSON.parse(localStorage.getItem('upn_dbCentral')) || [];
+        let colaOffline = JSON.parse(localStorage.getItem('upn_colaOffline')) || [];
+        let isAdmin = false;
+
+        function guardarBD() {
+            localStorage.setItem('upn_dbCentral', JSON.stringify(dbCentral));
+            localStorage.setItem('upn_colaOffline', JSON.stringify(colaOffline));
+            document.getElementById('ui-main-queue').innerText = colaOffline.length; 
+        }
+
+        let online = navigator.onLine;
+        function monitorearRed() {
+            online = navigator.onLine;
+            const badge = document.getElementById('net-badge');
+            const statusMain = document.getElementById('ui-main-status');
+            
+            if(online) {
+                badge.className = 'net-indicator net-on'; badge.innerHTML = '<i class="fa-solid fa-wifi"></i> CONECTADO';
+                statusMain.className = 'value green'; statusMain.innerHTML = '<i class="fa-solid fa-check-circle"></i> En Línea';
+                
+                if(colaOffline.length > 0) { 
+                    colaOffline.forEach(p => { p.st = 'enviado'; dbCentral.unshift(p); });
+                    colaOffline = []; guardarBD();
+                }
+            } else {
+                badge.className = 'net-indicator net-off'; badge.innerHTML = '<i class="fa-solid fa-wifi" style="text-decoration: line-through;"></i> SIN SEÑAL';
+                statusMain.className = 'value orange'; statusMain.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Offline';
+            }
+            render();
+        }
+        window.addEventListener('online', monitorearRed);
+        window.addEventListener('offline', monitorearRed);
+
+        function enviarPedido() {
+            const val = document.getElementById('app-prod').value.split('|');
+            const cant = parseInt(document.getElementById('app-cant').value);
+            const p = {
+                id: Math.random().toString(36).substr(2,6).toUpperCase(),
+                nom: val[0], cant: cant, tot: parseFloat(val[1]) * cant,
+                st: online ? 'enviado' : 'pendiente'
+            };
+            if(online) dbCentral.unshift(p); else colaOffline.unshift(p);
+            
+            // Limpia la cantidad para que se sienta que ya se registró
+            document.getElementById('app-cant').value = 1; 
+            
+            guardarBD(); render();
+        }
+
+        function setEstado(id, est) {
+            const p = dbCentral.find(x => x.id === id);
+            if(p) { p.st = est; guardarBD(); render(); }
+        }
+
+        function render() {
+            document.getElementById('ui-main-queue').innerText = colaOffline.length;
+
+            const rm = document.getElementById('ui-mozo-lista'); rm.innerHTML = '';
+            [...colaOffline, ...dbCentral].forEach(p => {
+                rm.innerHTML += `<div class="order-card st-${p.st}"><div><h4>${p.cant}x ${p.nom}</h4><p style="font-size:12px; color:var(--text-muted);">ID: ${p.id}</p></div><span class="badge">${p.st}</span></div>`;
+            });
+
+            const cn = document.getElementById('ui-cajero-nuevos'); cn.innerHTML = '';
+            const cp = document.getElementById('ui-cajero-prep'); cp.innerHTML = '';
+            dbCentral.forEach(p => {
+                if(p.st === 'enviado') cn.innerHTML += `<div class="order-card st-enviado"><div><h4>${p.cant}x ${p.nom}</h4></div><button onclick="setEstado('${p.id}','preparando')" style="padding:10px; background:var(--info); color:white; border:none; border-radius:6px; cursor:pointer; font-weight:bold;"><i class="fa-solid fa-play"></i></button></div>`;
+                if(p.st === 'preparando') cp.innerHTML += `<div class="order-card st-preparando"><div><h4>${p.cant}x ${p.nom}</h4></div><button onclick="setEstado('${p.id}','entregado')" style="padding:10px; background:purple; color:white; border:none; border-radius:6px; cursor:pointer; font-weight:bold;"><i class="fa-solid fa-check"></i></button></div>`;
+            });
+
+            if(isAdmin) {
+                const ta = document.getElementById('ui-admin-tabla'); ta.innerHTML = '';
+                let t = 0, c = 0;
+                dbCentral.forEach(p => {
+                    t += p.tot; 
+                    if(p.st === 'entregado') c++;
+                    ta.innerHTML += `<tr><td>${p.id}</td><td>${p.cant}x ${p.nom}</td><td>S/ ${p.tot.toFixed(2)}</td><td><span class="badge st-${p.st}" style="border: 1px solid">${p.st}</span></td></tr>`;
+                });
+                document.getElementById('ui-admin-total').innerText = `S/ ${t.toFixed(2)}`;
+                document.getElementById('ui-admin-count').innerText = c;
+            }
+        }
+
+        monitorearRed();
+    </script>
+</body>
+</html>
