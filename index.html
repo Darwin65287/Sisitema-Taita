@@ -381,6 +381,23 @@
                     <div class="panel" style="text-align: center;"><p style="color: var(--text-muted); text-transform: uppercase; font-size:12px;">Recaudación</p><h2 style="font-size: 35px; color: var(--neon);" id="ui-admin-total">S/ 0.00</h2></div>
                     <div class="panel" style="text-align: center;"><p style="color: var(--text-muted); text-transform: uppercase; font-size:12px;">Pedidos</p><h2 style="font-size: 35px; color: var(--neon);" id="ui-admin-count">0</h2></div>
                 </div>
+
+                <div class="panel">
+                    <div class="panel-head"><i class="fa-solid fa-users"></i> Gestión de Personal (Mozos)</div>
+                    <div id="ui-admin-mozos-list" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-bottom: 20px;"></div>
+                    
+                    <div style="margin-top: 15px; padding-top: 20px; border-top: 1px solid #334155;">
+                        <h4 style="margin-bottom: 15px; font-size: 14px; color: var(--text-muted);">Agregar Nuevo Personal</h4>
+                        <div class="grid-2-app" style="gap: 15px; margin-bottom: 15px;">
+                            <input type="text" id="new-mozo-name" class="form-control" style="margin: 0;" placeholder="Nombre Completo del Mozo">
+                            <input type="password" id="new-mozo-pin" class="form-control" style="margin: 0;" placeholder="PIN de acceso numérico">
+                        </div>
+                        <button class="btn-app" style="background: var(--success); color: white;" onclick="agregarMozo()">
+                            <i class="fa-solid fa-plus"></i> Registrar Mozo en el Sistema
+                        </button>
+                    </div>
+                </div>
+
                 <div class="panel">
                     <div class="panel-head">Auditoría Transaccional <button style="background: transparent; color: var(--danger); border: none; cursor: pointer; font-weight: bold;" onclick="cerrarSesionAdmin()"><i class="fa-solid fa-right-from-bracket"></i> Salir</button></div>
                     
@@ -407,6 +424,7 @@
                 <button onclick="cerrarModales()" class="btn-icon-close"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <p>En IHC, el diseño <strong>Mobile-First</strong> garantiza que la interfaz se construya pensando primero en las pantallas pequeñas (celulares de los mozos). Hemos aplicado la <strong>Ley de Fitts</strong> diseñando botones grandes y accesibles para el uso táctil a una mano, reduciendo la carga cognitiva y los errores durante el servicio rápido en el salón.</p>
+            <button class="btn-app" style="background: transparent; color: white; border: 1px solid #334155; margin-top: 10px;" onclick="cerrarModales()">Cerrar</button>
         </div>
     </div>
 
@@ -417,6 +435,7 @@
                 <button onclick="cerrarModales()" class="btn-icon-close"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <p>El sistema elimina la dependencia de servidores usando <strong>Client-Side Storage (LocalStorage)</strong> y la API <strong>navigator.onLine</strong>. Esto permite que el sistema responda en <strong>0 milisegundos</strong> y siga funcionando sin internet. Cuando la conexión regresa, un <em>Background Sync</em> envía los pedidos a la caja automáticamente.</p>
+            <button class="btn-app" style="background: transparent; color: white; border: 1px solid #334155; margin-top: 10px;" onclick="cerrarModales()">Cerrar</button>
         </div>
     </div>
 
@@ -437,6 +456,7 @@
             </div>
             
             <button class="btn-app" style="background: var(--warning); color: black;" onclick="guardarEdicionMozo()">Guardar Cambios Seguros</button>
+            <button class="btn-app" style="background: transparent; color: white; border: 1px solid #334155; margin-top: 10px;" onclick="cerrarModales()">Cancelar y Regresar</button>
             
             <p id="edit-mozo-error" style="color: var(--danger); display: none; margin-top: 15px;"><i class="fa-solid fa-circle-exclamation"></i> Clave de administrador incorrecta.</p>
             <p id="edit-mozo-success" style="color: var(--success); display: none; margin-top: 15px;"><i class="fa-solid fa-check"></i> Datos actualizados con éxito.</p>
@@ -446,7 +466,7 @@
     <div id="modal-recover-admin" class="modal-overlay" onclick="cerrarModales()">
         <div class="modal-box" onclick="event.stopPropagation()">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
-                <h2 style="margin: 0;"><i class="fa-solid fa-key"></i> Recuperación de Gerencia</h2>
+                <h2 style="margin: 0;"><i class="fa-solid fa-key"></i> Recuperación Gerencia</h2>
                 <button onclick="cerrarModales()" class="btn-icon-close"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <p>Ingrese la Clave Maestra del Sistema para autorizar el cambio de sus credenciales de administrador.</p>
@@ -459,6 +479,7 @@
             </div>
             
             <button class="btn-app" style="background: var(--warning); color: black;" onclick="recuperarAdmin()">Restablecer Acceso</button>
+            <button class="btn-app" style="background: transparent; color: white; border: 1px solid #334155; margin-top: 10px;" onclick="cerrarModales()">Cancelar y Regresar</button>
             
             <p id="rec-admin-error" style="color: var(--danger); display: none; margin-top: 15px;"><i class="fa-solid fa-circle-exclamation"></i> Clave maestra incorrecta.</p>
             <p id="rec-admin-success" style="color: var(--success); display: none; margin-top: 15px;"><i class="fa-solid fa-check"></i> Credenciales de Gerencia actualizadas.</p>
@@ -487,10 +508,9 @@
     <script>
         document.getElementById('ui-main-date').innerText = new Date().toLocaleDateString('es-PE', { year: 'numeric', month: 'short', day: 'numeric' });
 
-        // --- SISTEMA DE NAVEGACIÓN SPA (HISTORY API) PARA BOTÓN ATRÁS ---
+        // --- SISTEMA DE NAVEGACIÓN SPA (HISTORY API) ---
         function mostrarVista(vistaId) {
-            cerrarModales(); // Si hay modales abiertos, los cierra
-            
+            cerrarModales(); 
             if(vistaId === 'landing') {
                 document.getElementById('app-container').style.display = 'none';
                 document.getElementById('landing-container').style.display = 'block';
@@ -517,49 +537,87 @@
             window.scrollTo(0, 0);
         }
 
-        // Detecta cuando el usuario presiona "Atrás" o "Adelante" en su navegador
         window.addEventListener('popstate', (e) => {
-            if(e.state && e.state.vista) {
-                mostrarVista(e.state.vista);
-            } else {
-                mostrarVista('landing');
-            }
+            if(e.state && e.state.vista) mostrarVista(e.state.vista);
+            else mostrarVista('landing');
         });
 
-        // Configura la página inicial en el historial
         window.addEventListener('load', () => {
             history.replaceState({ vista: 'landing' }, '', window.location.pathname);
             mostrarVista('landing');
         });
 
-        // --- FUNCIONES DE BOTONES ACTUALIZADAS CON HISTORY API ---
-        function abrirApp() { 
-            history.pushState({ vista: 'vista-selector' }, '', '#plataforma');
-            mostrarVista('vista-selector');
-        }
-        function cerrarApp() { 
-            history.pushState({ vista: 'landing' }, '', '#');
-            mostrarVista('landing');
-        }
-        function volverMenuRoles() { 
-            history.pushState({ vista: 'vista-selector' }, '', '#plataforma');
-            mostrarVista('vista-selector');
-        }
+        function abrirApp() { history.pushState({ vista: 'vista-selector' }, '', '#plataforma'); mostrarVista('vista-selector'); }
+        function cerrarApp() { history.pushState({ vista: 'landing' }, '', '#'); mostrarVista('landing'); }
+        function volverMenuRoles() { history.pushState({ vista: 'vista-selector' }, '', '#plataforma'); mostrarVista('vista-selector'); }
         function seleccionarRol(rol) {
             let targetId = (rol === 'mozo') ? 'vista-mozo-login' : `vista-${rol}`;
             history.pushState({ vista: targetId }, '', `#${targetId}`);
             mostrarVista(targetId);
         }
 
-        // --- SISTEMA DINÁMICO DE MOZOS ---
-        let dbMozos = JSON.parse(localStorage.getItem('upn_dbMozos')) || [ { id: 'm1', nombre: 'Carlos Mendoza', pin: '1234' }, { id: 'm2', nombre: 'Juan Pérez', pin: '1234' }, { id: 'm3', nombre: 'María López', pin: '1234' } ];
+        // --- SISTEMA DINÁMICO Y GESTIÓN DE MOZOS ---
+        let dbMozos = JSON.parse(localStorage.getItem('upn_dbMozos')) || [ { id: 'm1', nombre: 'Carlos Mendoza', pin: '1234' }, { id: 'm2', nombre: 'Juan Pérez', pin: '1234' } ];
+        
         function guardarMozos() { localStorage.setItem('upn_dbMozos', JSON.stringify(dbMozos)); }
+        
         function renderSelectMozos() {
             const selectLogin = document.getElementById('log-mozo-user'); const selectEdit = document.getElementById('edit-mozo-id');
             selectLogin.innerHTML = ''; selectEdit.innerHTML = '';
             dbMozos.forEach(m => { const opt = `<option value="${m.id}">${m.nombre}</option>`; selectLogin.innerHTML += opt; selectEdit.innerHTML += opt; });
         }
         renderSelectMozos();
+
+        function renderAdminMozos() {
+            if(!isAdmin) return;
+            const list = document.getElementById('ui-admin-mozos-list');
+            if(!list) return;
+            list.innerHTML = '';
+            dbMozos.forEach(m => {
+                list.innerHTML += `
+                    <div class="order-card" style="border-left: 5px solid var(--info); display: flex; flex-direction: column; align-items: stretch; gap: 10px;">
+                        <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
+                            <div>
+                                <h4><i class="fa-solid fa-user-tie"></i> ${m.nombre}</h4>
+                                <p style="font-size:12px; color:var(--text-muted);">PIN Acceso: ${m.pin}</p>
+                            </div>
+                        </div>
+                        <button onclick="eliminarMozo('${m.id}')" style="background:var(--danger); color:white; border:none; padding:8px 12px; border-radius:6px; cursor:pointer; width: 100%; font-weight: bold; transition: 0.2s;">
+                            <i class="fa-solid fa-trash"></i> Eliminar del Sistema
+                        </button>
+                    </div>
+                `;
+            });
+        }
+
+        function agregarMozo() {
+            const nombre = document.getElementById('new-mozo-name').value;
+            const pin = document.getElementById('new-mozo-pin').value;
+            if(nombre.trim() === '' || pin.trim() === '') {
+                alert('Por favor, ingresa el nombre y el PIN del nuevo mozo.');
+                return;
+            }
+            const nuevoId = 'm' + Date.now();
+            dbMozos.push({ id: nuevoId, nombre: nombre, pin: pin });
+            guardarMozos();
+            renderSelectMozos();
+            renderAdminMozos();
+            document.getElementById('new-mozo-name').value = '';
+            document.getElementById('new-mozo-pin').value = '';
+        }
+
+        function eliminarMozo(id) {
+            if(dbMozos.length <= 1) {
+                alert('Debe haber al menos un mozo registrado en el sistema.');
+                return;
+            }
+            if(confirm('¿Estás seguro de eliminar a este empleado del sistema permanentemente?')) {
+                dbMozos = dbMozos.filter(m => m.id !== id);
+                guardarMozos();
+                renderSelectMozos();
+                renderAdminMozos();
+            }
+        }
 
         let currentMozo = '';
         function loginMozo() {
@@ -568,7 +626,6 @@
             if(mozo && mozo.pin === p) { 
                 currentMozo = mozo.nombre; document.getElementById('ui-mozo-name').innerText = mozo.nombre; 
                 document.getElementById('log-mozo-error').style.display = 'none'; document.getElementById('log-mozo-pass').value = ''; 
-                
                 history.pushState({ vista: 'vista-mozo' }, '', '#salon');
                 mostrarVista('vista-mozo');
             } else { document.getElementById('log-mozo-error').style.display = 'block'; }
@@ -584,7 +641,6 @@
             if(u === adminCreds.user && p === adminCreds.pass) {
                 isAdmin = true; 
                 document.getElementById('log-error').style.display = 'none'; document.getElementById('log-user').value = ''; document.getElementById('log-pass').value = ''; 
-                
                 history.pushState({ vista: 'vista-admin-panel' }, '', '#gerencia');
                 mostrarVista('vista-admin-panel');
             } else { document.getElementById('log-error').style.display = 'block'; }
@@ -600,11 +656,9 @@
                 if(newUser.trim() !== '' && newPass.trim() !== '') {
                     adminCreds = { user: newUser, pass: newPass };
                     localStorage.setItem('upn_adminCreds', JSON.stringify(adminCreds));
-                    
                     document.getElementById('rec-admin-error').style.display = 'none';
                     document.getElementById('rec-admin-success').style.display = 'block';
                     document.getElementById('rec-master-key').value = '';
-                    
                     document.getElementById('log-user').placeholder = `Usuario (ej. ${newUser})`;
                 }
             } else {
@@ -677,6 +731,9 @@
                 const ta = document.getElementById('ui-admin-tabla'); ta.innerHTML = ''; let t = 0, c = 0;
                 dbCentral.forEach(p => { t += p.tot; if(p.st === 'entregado') c++; ta.innerHTML += `<tr><td>${p.id}</td><td>${p.mozo}</td><td>${p.cant}x ${p.nom}</td><td>S/ ${p.tot.toFixed(2)}</td><td><span class="badge st-${p.st}" style="border: 1px solid">${p.st}</span></td></tr>`; });
                 document.getElementById('ui-admin-total').innerText = `S/ ${t.toFixed(2)}`; document.getElementById('ui-admin-count').innerText = c;
+                
+                // Actualiza la lista visual de personal (mozos) en el panel de administrador
+                renderAdminMozos();
             }
         }
 
